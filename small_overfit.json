@@ -1,0 +1,54 @@
+[
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/jpg/Tp_S_NRN_M_N_cha00067_cha00067_10316.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_S_NRN_M_N_cha00067_cha00067_10316_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/jpg/Tp_S_NNN_S_N_art00056_art00056_01404.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_S_NNN_S_N_art00056_art00056_01404_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/Tp/Tp_D_CRN_M_N_nat10116_cha00026_11674.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_D_CRN_M_N_nat10116_cha00026_11674_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/jpg/Tp_D_NRD_M_N_sec00057_nat00001_00078.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_D_NRD_M_N_sec00057_nat00001_00078_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/jpg/Tp_D_NNN_M_N_arc00050_arc00086_00270.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_D_NNN_M_N_arc00050_arc00086_00270_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/jpg/Tp_S_NRN_S_N_pla20046_pla20046_01946.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_S_NRN_S_N_pla20046_pla20046_01946_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/jpg/Tp_S_NNN_S_N_nat20060_nat20060_02254.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_S_NNN_S_N_nat20060_nat20060_02254_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/jpg/Tp_S_NRN_S_N_ani20058_ani20058_02100.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_S_NRN_S_N_ani20058_ani20058_02100_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/Tp/Tp_S_NNN_S_N_cha10188_cha10188_12305.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_S_NNN_S_N_cha10188_cha10188_12305_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/Tp/Tp_D_NRN_M_N_cha00054_cha00067_11723.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_D_NRN_M_N_cha00054_cha00067_11723_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/jpg/Tp_S_NNN_S_N_arc20084_arc20084_01724.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_S_NNN_S_N_arc20084_arc20084_01724_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/jpg/Tp_S_NRN_S_N_cha00004_cha00004_00324.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_S_NRN_S_N_cha00004_cha00004_00324_gt.png"
+  ],
+  [
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2.0/Tp/Tp_S_CNN_S_O_ind00071_ind00071_10940.jpg",
+    "/home/lab301-3090/wujun/datasets/CASIA/CASIA 2 Groundtruth/Tp_S_CNN_S_O_ind00071_ind00071_10940_gt.png"
+  ]
+]

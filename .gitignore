@@ -1,0 +1,37 @@
+__pycache__/
+*.py[cod]
+*.log
+
+# Local IDE / OS files
+.idea/
+.vscode/
+.DS_Store
+
+# Training outputs and experiment artifacts
+output_dir/
+runs/
+wandb/
+semantic_refine_output_segformer/
+my_utils/np_out/
+my_utils/srm_bayar_out/
+
+# Model weights and checkpoints
+*.pth
+*.pt
+*.ckpt
+*.bin
+*.h5
+checkpoint*/
+checkpoint_train/
+fuzhuloss*/
+fuzhu loss*/
+shougongtez/
+yuanshi checkpoint/
+segformer_b2_ade/
+
+# Large/generated dataset indexes
+data___json/
+
+# Local scripts/secrets
+mytrain.sh
+*.env

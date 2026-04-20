@@ -1,0 +1,108 @@
+# 文件：decoderhead_forma.py 同目录下的新/改类使用
+from SparseViT import SparseViT
+import torch.nn as nn
+import torch
+import torch.nn.functional as F
+from functools import partial
+from timm.models.layers import trunc_normal_
+
+# 直接从本文件/同路径引入你刚才定义的模块
+# 若 SparseFormaHeadH16、ModalitiesExtractor、ModalMixer 与该类不在同一文件，
+# 请改成：from decodehead_forma import SparseFormaHeadH16, ModalitiesExtractor, ModalMixer
+from decodehead_forma import SparseFormaHeadH16, ModalitiesExtractor, ModalMixer
+
+
+class SparseViT_Mul(nn.Module):
+    def __init__(self,
+                 depth=[5, 8, 20, 7],
+                 embed_dim=[64, 128, 320, 512],
+                 head_dim=64,
+                 img_size=512,
+                 s_blocks3=[8, 4, 2, 1],
+                 s_blocks4=[2, 1],
+                 mlp_ratio=4,
+                 qkv_bias=True,
+                 norm_layer=partial(nn.LayerNorm, eps=1e-6),
+                 pretrained_path=None,
+                 num_classes=1,
+                 embedding_dim=96,      # 解码头工作通道（与 ForMA 基线一致）
+                 ):
+        super(SparseViT_Mul, self).__init__()
+        self.img_size = img_size
+
+        # 1) 主干
+        self.encoder_net = SparseViT(
+            layers=depth,
+            embed_dim=embed_dim,
+            img_size=img_size,
+            s_blocks3=s_blocks3,
+            s_blocks4=s_blocks4,
+            head_dim=head_dim,
+            drop_path_rate=0.2,
+            mlp_ratio=mlp_ratio,
+            qkv_bias=qkv_bias,
+            norm_layer=norm_layer,
+            pretrained_path=pretrained_path,
+        )
+
+        # 2) 模态：提取 + 混合  →  x_modals (B,3,*,*)
+        self.modal_extractor = ModalitiesExtractor(modals=('noiseprint', 'bayar', 'srm'))
+        self.modal_mixer = ModalMixer(modals=['noiseprint', 'bayar', 'srm'],
+                                      in_channels=[3, 3, 3],
+                                      out_channels=3)
+
+        # 3) 解码头：H/16 参考，H/32 用 PixelShuffle(2)，与 ForMA 融合基线一致
+        self.decode_head = SparseFormaHeadH16(
+            num_classes=num_classes,
+            in_ch_16=embed_dim[2],   # 320
+            in_ch_32=embed_dim[3],   # 512
+            embedding_dim=embedding_dim
+        )
+
+        self.bce = nn.BCEWithLogitsLoss()
+
+        self.apply(self._init_weights)
+
+    def _init_weights(self, m):
+        if isinstance(m, nn.Linear):
+            trunc_normal_(m.weight, std=.02)
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.LayerNorm):
+            nn.init.constant_(m.bias, 0)
+            nn.init.constant_(m.weight, 1.0)
+
+    def forward(self, image, mask, *args, **kwargs):
+        """
+        image: (B,3,H,W)
+        mask : (B,1,H,W)
+        返回：loss, prob
+        """
+        # 1) 主干特征
+        feats = self.encoder_net(image)  # dict: third1/2/3/third (320, H/16), last1/last (512, H/32)
+
+        # 2) 模态特征：提取 + 混合
+        mod_list = self.modal_extractor.multi_output(image)  # list of [B,3,H,W] * 3
+        x_modals = self.modal_mixer(mod_list)  # (B,3,*,*)
+
+        # 对齐到参考 H/16，以 third 的尺寸为准
+        ref_h, ref_w = feats["third"].shape[-2:]
+        if x_modals.shape[-2:] != (ref_h, ref_w):
+            x_modals = F.interpolate(x_modals, size=(ref_h, ref_w), mode='bilinear', align_corners=False)
+
+        # 3) 解码（得到 H/16 的 logits）
+        logits = self.decode_head(feats, x_modals)  # (B,1,H/16,W/16)
+
+        # 4) 上采样到原图大小监督
+        logits_up = F.interpolate(logits, size=(self.img_size, self.img_size),
+                                  mode='bilinear', align_corners=False)
+
+        # 5) 掩码统一到 0/1 并与 logits 对齐
+        gt = mask.float()
+
+        # 6) 损失（BCEWithLogitsLoss 直接吃 logits ）
+        loss = self.bce(logits_up, gt)
+
+        # 7) 概率用于可视化/评测
+        prob = torch.sigmoid(logits_up)
+        return loss, prob
