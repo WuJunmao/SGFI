@@ -1,167 +1,68 @@
-# Can We Get Rid of Handcrafted Feature Extractors? SparseViT: Nonsemantics-Centered, Parameter-Efficient Image Manipulation Localization through Spare-Coding Transformer
+# SGFI: Stage-wise Gated Forensic Prior Injection for Image Manipulation Localization
 
-Official repository for the AAAI2025 paper  *Can We Get Rid of Handcrafted Feature Extractors? SparseViT: Nonsemantics-Centered, Parameter-Efficient Image Manipulation Localization through Spare-Coding Transformer* [[paper]](https://arxiv.org/abs/2412.14598) [[website]](https://github.com/scu-zjz/SparseViT).
+This repository contains the official implementation of the paper:
 
-<p float="left">
-  <img src="images/sparsevit.png" alt="SparseViT Framework Diagram" width="98%">
-</p>
+> **Stage-wise Gated Forensic Prior Injection with Training-only Deep Supervision for Image Manipulation Localization**  
+> Huihuang Zhao, Jun Wu  
+> *Submitted to Image and Vision Computing*
 
-In summary, SparseViT leverages the distinction between semantic and non-semantic features, enabling the model to adaptively extract non-semantic features that are more critical for image manipulation localization. This provides a novel approach to precisely identifying manipulated regions.
+## Overview
 
-## Dataset Preparation
+Image Manipulation Localization (IML) aims to predict pixel-level masks of manipulated regions. This work introduces **SGFI**, a lightweight extension framework built on SparseViT, with two key designs:
 
-<details>
-  <summary>Dataset Preparation</summary>
-  <br>
-  (1) Since SparseViT was trained using the CAT-Net joint dataset, you need to download the combined dataset. The specific datasets include:
+1. **Stage-wise Gated Residual Fusion** – Injects noise-sensitive Noiseprint++ prior into each encoder stage through spatially adaptive gates, preserving weak forensic traces throughout the network.
+2. **Training-only Deep Supervision** – Attaches an auxiliary supervision head to Stage 3 during training to provide direct constraints on intermediate representations. The auxiliary branch is removed during inference, incurring no additional deployment cost.
 
- - CASIA2.0
- - FantasticReality_v1
- - IMD_20  
- - tampCOCO
+Additionally, a conservative polarity-aware heuristic is applied during evaluation to mitigate instability caused by mask inversion in threshold-based metrics.
 
-  （For more detailed information about the dataset, you can refer to CAT-Net.）
+## Framework Overview
 
-  (2) The organization of the dataset, we have defined two types of Dataset classes:
+![Framework](figs/Fig3.png)
 
- - json_dataset, To retrieve the input images and their corresponding ground truth from a JSON file, the format would typically look like this:
-```json
-[
-    [
-        "/Dataset/CASIAv2/Tp/Tp_D_NRN_S_N_arc00013_sec00045_11700.jpg",
-        "/Dataset/CASIAv2/Gt/Tp_D_NRN_S_N_arc00013_sec00045_11700_gt.png"
-    ],
-    [
-        "/Dataset/CASIAv2/Au/Au_nat_30198.jpg",
-        "Negative"
-    ],
-    ...
-]
-Note: "Negative" indicates a real image with no ground truth.
-```
-- mani_dataset，Automatically loads images and their corresponding ground truth pairs from a directory. The directory structure should include：
+## Results
 
-  Tp subdirectory（for storing input images）
+Under the CAT-Net training protocol, SGFI achieves state-of-the-art performance on five public benchmarks:
 
-  Gt subdirectory（for storing ground truth）
+| Method | COVERAGE | Columbia | NIST16 | COCO-Glide | Realistic | **AVG F1** |
+|--------|----------|----------|--------|------------|-----------|-----------|
+| SparseViT (baseline) | 0.502 | 0.922 | 0.376 | 0.361 | 0.205 | 0.473 |
+| **SGFI (Ours)** | 0.548 | 0.946 | 0.383 | 0.407 | 0.228 | **0.502** |
 
-  File pairing is automatically completed using the os.listdir() function.
+- **F1 gain**: +0.029
+- **IoU gain**: +0.027
 
-  An example of the organization of mani_dataset is provided in the /images directory.
+For detailed quantitative and qualitative results, please refer to the paper.
 
+## Datasets
 
-(3) Combined dataset configuration, organize each dataset into a JSON file in the following format:
+### Training Data (following CAT-Net protocol)
+- [CASIA v2.0](https://www.kaggle.com/datasets/casia)
+- [IMD2020](https://www.kaggle.com/datasets/imbikramsaha/imd2020)
+- MS COCO (used for splicing set construction)
 
-```json
-[
-    ["ManiDataset", "/mnt/data0/public_datasets/IML/CASIA2.0"],
-    ["JsonDataset", "/mnt/data0/public_datasets/IML/FantasticReality_v1/FantasticReality.json"],
-    ["ManiDataset", "/mnt/data0/public_datasets/IML/IMD_20_1024"],
-    ["JsonDataset", "/mnt/data0/public_datasets/IML/tampCOCO/sp_COCO_list.json"],
-    ["JsonDataset", "/mnt/data0/public_datasets/IML/tampCOCO/cm_COCO_list.json"],
-    ["JsonDataset", "/mnt/data0/public_datasets/IML/tampCOCO/bcm_COCO_list.json"],
-    ["JsonDataset", "/mnt/data0/public_datasets/IML/tampCOCO/bcmc_COCO_list.json"]
-]
-```
-  Configure the path to the organized JSON file in the data_path parameter within the train.sh file.
-</details>
+### Testing Benchmarks
+- [COVERAGE](https://github.com/wenbihan/coverage)
+- [Columbia](https://www.ee.columbia.edu/ln/dvmm/downloads/AuthSplicedDataSet/)
+- [NIST16](https://www.nist.gov/itl/iad/mig/nist-16-deepfake-media-forensics-challenge)
+- COCO-Glide
+- [Realistic Tampering](https://github.com/ymnis/Realistic-Tampering-Dataset)
 
-## Train setup
-<details>
-  <summary>1) Set up the coding environment</summary>
-  <br>
+> **Note**: CASIA v1.0 is excluded from testing because the training set includes CASIA v2.0, and the two datasets share similar content patterns.
 
-   - First, clone the repository:
+## Requirements
 
-  ```bash
-git clone https://github.com/scu-zjz/SparseViT.git
-  ```
+- Python 3.8+
+- PyTorch 1.10+
+- torchvision
+- numpy
+- opencv-python
+- scikit-learn
+- matplotlib
+- tqdm
 
-  - Our environment
+## Installation
 
-  ```
-  Ubuntu LTS 20.04.1
-
-  CUDA 11.5 + cudnn 8.4.0
-
-  Python 3.10
-
-  PyTorch 2.4
-  ```
-
-  - You should install the packages in [requirements.txt](https://github.com/scu-zjz/SparseViT/blob/main/requirements.txt) 
-
-  ```bash
+```bash
+git clone https://github.com/WuJunmao/SGFI.git
+cd SGFI
 pip install -r requirements.txt
-  ```
-
-</details>
-
-<details>
-  <summary>2) Download the Uniformer pretrained weights</summary>
-  <br>
-  
-  - Download the pretrained weights from [Google Drive](https://drive.google.com/file/d/1XPjAXhDS6nGNXb11VzgdNqEeM7X0p2t9/view?usp=drive_link) and place them in the checkpoint/train/pretrain directory.
-  - Modify the pretrain_path in the train.sh file to the location of your Uniformer pre-trained model.
-    
-</details>
-
-## Test setup
-
-<details>
-  <summary>1) Set up the coding environment</summary>
-  <br>
-
-  - Consistent with "train".
-
-
-</details>
-
-<details>
-  <summary>2) Download our pretrained checkpoints</summary>
-  <br>
-  
-  - Download our pretrained checkpoints from [Google Drive](https://drive.google.com/file/d/104BPPvLXkxuPu_NHaxjesdcdZ-ln92-G/view?usp=drive_link) and place them in the checkpoint/test directory.
-    
-</details>
-
-## Scripts
-
-This should be super easy! Simply run
-
- - For Train
-```
-sh train.sh
-```
-
- - For Test
-```
-python main_test.py
-```
-
-Here we simply provide the basic training and testing for SparseViT. Of course, you can train and test SparseViT within our proposed [IMDL-BenCo](https://github.com/scu-zjz/IMDLBenCo) framework, as they are fully compatible.
-
-## Citation
-
-If you find our code useful, please consider citing us and give us a star! 
-
-```
-@inproceedings{su2025can,
-  title={Can we get rid of handcrafted feature extractors? sparsevit: Nonsemantics-centered, parameter-efficient image manipulation localization through spare-coding transformer},
-  author={Su, Lei and Ma, Xiaochen and Zhu, Xuekang and Niu, Chaoqun and Lei, Zeyu and Zhou, Ji-Zhe},
-  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
-  volume={39},
-  number={7},
-  pages={7024--7032},
-  year={2025}
-}
-```
-
-## Star History
-<a href="https://star-history.com/#scu-zjz/SparseViT&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=scu-zjz/SparseViT&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=scu-zjz/SparseViT&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=scu-zjz/SparseViT&type=Date" />
- </picture>
-</a>
